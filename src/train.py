@@ -82,12 +82,6 @@ def build_feature_extractor():
 
 feature_extractor = build_feature_extractor()
 
-"""
-The labels of the videos are strings. Neural networks do not understand string values,
-so they must be converted to some numerical form before they are fed to the model. Here
-we will use the [`StringLookup`](https://keras.io/api/layers/preprocessing_layers/categorical/string_lookup)
-layer encode the class labels as integers.
-"""
 
 label_processor = keras.layers.StringLookup(
     num_oov_indices=0, vocabulary=np.unique(train_df["tag"])
