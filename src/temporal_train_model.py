@@ -1,9 +1,9 @@
 import numpy as np
 from tensorflow.keras.models import Sequential, load_model
-from tensorflowkeras.layers import Dense, Dropout, Activation, Flatten
-from tensorflowkeras.layers import Conv2D, MaxPooling2D
-from tensorflowkeras.optimizers import SGD, Adam
-from tensorflowkeras.layers import BatchNormalization
+from tensorflow.keras.layers import Dense, Dropout, Activation, Flatten
+from tensorflow.keras.layers import Conv2D, MaxPooling2D
+from tensorflow.keras.optimizers import SGD, Adam
+from tensorflow.keras.layers import BatchNormalization
 
 class ResearchModels():
     def __init__(self, nb_classes, num_of_snip, opt_flow_len, image_shape = (224, 224), saved_model=None):
@@ -34,9 +34,9 @@ class ResearchModels():
             self.input_shape = (image_shape[0], image_shape[1], opt_flow_len * 2 * self.num_of_snip)
             self.model = self.cnn_temporal()
 
-        optimizer = SGD(lr=1e-2, momentum=0.9, nesterov=True)
+        #optimizer = SGD(lr=1e-2, momentum=0.9, nesterov=True)
 
-        self.model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=metrics)
+        self.model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=metrics)
 
         print(self.model.summary())
 
@@ -51,34 +51,34 @@ class ResearchModels():
         model = Sequential()
 
         #conv1
-        model.add(Conv2D(96, (7, 7), strides=2, padding='same', input_shape=self.input_shape))
+        model.add(Conv2D(64, (7, 7), strides=2, padding='same', input_shape=self.input_shape))
         model.add(BatchNormalization())
         model.add(Activation('relu'))
         model.add(MaxPooling2D(pool_size=(2, 2)))
 
         #conv2
-        model.add(Conv2D(256, (5, 5), strides=2, padding='same'))
+        model.add(Conv2D(64, (5, 5), strides=2, padding='same'))
         model.add(Activation('relu'))
         model.add(MaxPooling2D(pool_size=(2, 2)))
 
         #conv3
-        model.add(Conv2D(512, (3, 3), strides=1, activation='relu', padding='same'))
+        model.add(Conv2D(256, (3, 3), strides=1, activation='relu', padding='same'))
 
         #conv4
-        model.add(Conv2D(512, (3, 3), strides=1, activation='relu', padding='same'))
+        model.add(Conv2D(256, (3, 3), strides=1, activation='relu', padding='same'))
 
         #conv5
-        model.add(Conv2D(512, (3, 3), strides=1, activation='relu', padding='same'))
+        model.add(Conv2D(256, (3, 3), strides=1, activation='relu', padding='same'))
         model.add(MaxPooling2D(pool_size=(2, 2)))
 
         #full6
         model.add(Flatten())
-        model.add(Dense(4096, activation='relu'))
-        model.add(Dropout(0.9))
+        model.add(Dense(256, activation='relu'))
+        model.add(Dropout(0.2))
 
         #full7
-        model.add(Dense(2048, activation='relu'))
-        model.add(Dropout(0.9))
+        model.add(Dense(64, activation='relu'))
+        model.add(Dropout(0.2))
 
         #softmax
         model.add(Dense(self.nb_classes, activation='softmax'))
