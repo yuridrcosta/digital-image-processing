@@ -1,9 +1,10 @@
 """
 Train our temporal-stream CNN on optical flow frames.
 """
-from tensorflow.keras.callbacks import TensorBoard, ModelCheckpoint, EarlyStopping, CSVLogger, LearningRateScheduler
+from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping, CSVLogger, LearningRateScheduler
 from temporal_train_model import ResearchModels
 from temporal_train_data import DataSet
+import matplotlib.pyplot as plt
 import time
 import os.path
 from os import makedirs
@@ -35,18 +36,13 @@ def train(num_of_snip=5, opt_flow_len=10, saved_model=None,
             os.makedirs(directory1)
     checkpointer = ModelCheckpoint(
             filepath=os.path.join(directory1,
-                    '{epoch:03d}-{val_loss:.3f}.hdf5'),
+                    'best_model.hdf5'),
             verbose=1,
             save_best_only=True)
 
-    # Callbacks: TensorBoard
-    directory2 = os.path.join('out', 'TB', name_str)
-    if not os.path.exists(directory2):
-            os.makedirs(directory2)
-    tb = TensorBoard(log_dir=os.path.join(directory2))
 
     # Callbacks: Early stopper.
-    early_stopper = EarlyStopping(monitor='loss', patience=100)
+    early_stopper = EarlyStopping(monitor='loss', patience=10)
 
     # Callbacks: Save results.
     directory3 = os.path.join('out', 'logs', name_str)
@@ -95,41 +91,56 @@ def train(num_of_snip=5, opt_flow_len=10, saved_model=None,
     # Fit!
     if load_to_memory:
         # Use standard fit.
-        temporal_cnn.model.fit(
+        modelHist=temporal_cnn.model.fit(
                 X,
                 y,
                 batch_size=batch_size,
                 validation_data=(X_test, y_test),
                 verbose=1,
-                callbacks=[tb, early_stopper, csv_logger],
+                callbacks=[early_stopper, csv_logger],
                 epochs=nb_epoch)
     else:
         # Use fit generator.
-        temporal_cnn.model.fit_generator(
+        modelHist=temporal_cnn.model.fit_generator(
                 generator=generator,
                 steps_per_epoch=steps_per_epoch,
                 epochs=nb_epoch,
                 verbose=1,
-                callbacks=[tb, early_stopper, csv_logger, checkpointer, lr_schedule],
+                callbacks=[early_stopper, csv_logger, checkpointer, lr_schedule],
                 validation_data=val_generator,
                 validation_steps=1,
                 max_queue_size=20,
                 workers=1,
                 use_multiprocessing=False)
+        train_loss = modelHist.history['loss']
+        val_loss   = modelHist.history['val_loss']
+        train_acc  = modelHist.history['acc']
+        val_acc    = modelHist.history['val_acc']
+        xc         = range(nb_epochs)
+
+        plt.figure()
+        plt.subplot('211')
+        plt.grid()
+        plt.plot(xc, train_loss,xc, val_loss)
+        plt.legend(['train_loss','val_loss'])
+        plt.subplot('212')
+        plt.plot(xc, train_acc,xc, val_acc)
+        plt.legend(['train_acc','val_acc'])
+        pyplot.savefig(f'model_history.pdf')
 
 def main():
     """These are the main training settings. Set each before running
     this file."""
     "=============================================================================="
     saved_model = None
-    class_limit = None  # int, can be 1-101 or None
+    class_limit = 5  # int, can be 1-101 or None
     num_of_snip = 1 # number of chunks used for each video
-    opt_flow_len = 10 # number of optical flow frames used
+    opt_flow_len = 15 # number of optical flow frames used
     image_shape=(224, 224)
     load_to_memory = False  # pre-load the sequences into memory
     batch_size = 64
-    nb_epoch = 2222
-    name_str = None
+    nb_epoch = 500
+    name_str = '15fev-top5classes-new-arch'
     "=============================================================================="
 
     train(num_of_snip=num_of_snip, opt_flow_len=opt_flow_len, saved_model=saved_model,
