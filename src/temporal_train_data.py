@@ -197,38 +197,41 @@ class DataSet():
             # horizontal components
             img = None # reset to be safe
             img = cv2.imread(opt_flow_dir_x + '/frame' + "%06d"%(i_frame) + '.jpg', 0)
-            print(opt_flow_dir_x + '/frame' + "%06d"%(i_frame) + '.jpg')
-            img = np.array(img)
-            # mean substraction 
-            img = img - np.mean(img)
-            if train_test == 'train' or val_aug == 'center':
-                # crop
-                img = img[left : right, top : bottom]
-            else:
-                #resize
-                img = cv2.resize(img, self.image_shape)
-            img = img / 255. # normalize pixels 
-            if flip:
-                img = -img
-            img = cv2.resize(img, self.image_shape)
-            opt_flow_stack.append(img)
-
-            # vertical components
             img2 = None # reset to be safe
             img2 = cv2.imread(opt_flow_dir_y + '/frame' + "%06d"%(i_frame) + '.jpg', 0)
-            # mean substraction 
-            img2 = np.array(img2)
-            img2 = np.swapaxes(img2, 0, 1)
-            img2 = img2 - np.mean(img2)
-            if train_test == 'train' or val_aug == 'center':
-                # crop
-                img2 = img2[left : right, top : bottom]
+            if img is None or img2 is None:
+                frames.append(frames[-1]+1)
             else:
-                #resize
+                print(opt_flow_dir_x + '/frame' + "%06d"%(i_frame) + '.jpg')
+                img = np.array(img)
+                # mean substraction 
+                #img = img - np.mean(img)
+                if train_test == 'train' or val_aug == 'center':
+                    # crop
+                    img = img[left : right, top : bottom]
+                else:
+                    #resize
+                    img = cv2.resize(img, self.image_shape)
+                img = img / 255. # normalize pixels 
+                if flip:
+                    img = -img
+                img = cv2.resize(img, self.image_shape)
+                opt_flow_stack.append(img)
+
+                # vertical components
+                # mean substraction 
+                img2 = np.array(img2)
+                #img2 = np.swapaxes(img2, 0, 1)
+                #img2 = img2 - np.mean(img2)
+                if train_test == 'train' or val_aug == 'center':
+                    # crop
+                    img2 = img2[left : right, top : bottom]
+                else:
+                    #resize
+                    img2 = cv2.resize(img2, self.image_shape)
+                img2 = img2 / 255. # normalize pixels
                 img2 = cv2.resize(img2, self.image_shape)
-            img2 = img2 / 255. # normalize pixels
-            img = cv2.resize(img, self.image_shape)
-            opt_flow_stack.append(img2)
+                opt_flow_stack.append(img2)
 
         opt_flow_stack = np.array(opt_flow_stack)
         print(opt_flow_stack.shape)
@@ -240,5 +243,3 @@ class DataSet():
             opt_flow_stack = np.flip(opt_flow_stack, 0)
 
         return opt_flow_stack
-
-
