@@ -74,7 +74,11 @@ We use spatial and temporal stream cnn under the Keras framework to reproduce pu
     tar xf ucf101_top5.tar.gz 
     
 Para treinar o modelo, digite:
+
     python train.py
+    
 Para realizar a inferência em um vídeo escolhido aleatoriamente, digite:
+
     python inference.py
-Um GIF 'animation.gif' com do vídeo será salvo para conferir e o resultado sairá no terminal
+    
+Um GIF 'animation.gif' do vídeo será salvo para conferir e o resultado sairá no terminal
