@@ -67,10 +67,14 @@ We use spatial and temporal stream cnn under the Keras framework to reproduce pu
 
   `python3 temporal_valida_train.py`
 
-## Resultados
+# Instruções Rede Neural Recorrente
 
-|Network     |Simonyan et al [[1]](http://papers.nips.cc/paper/5353-two-stream-convolutional) |Ours  |
--------------|:--------------:|:----:|
-|Spatial     |72.7%           |73.1% |
-|Temporal    |81.0%           |78.8% |
-|Fusion      |85.9%           |82.0% |
+    pip install -q git+https://github.com/tensorflow/docs
+    wget -q https://git.io/JGc31 -O ucf101_top5.tar.gz
+    tar xf ucf101_top5.tar.gz 
+    
+Para treinar o modelo, digite:
+    python train.py
+Para realizar a inferência em um vídeo escolhido aleatoriamente, digite:
+    python inference.py
+Um GIF 'animation.gif' com do vídeo será salvo para conferir e o resultado sairá no terminal
